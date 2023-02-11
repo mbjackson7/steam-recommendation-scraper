@@ -8,10 +8,12 @@ import time
 URL = "http://store.steampowered.com/explore/random/"
 G = nx.DiGraph()
 
+nodes = int(input("How many nodes?"))
+
 start = time.time()
 
 try:
-  for z in range(5000):
+  for z in range(nodes):
     print(z)
     recList = []
 
@@ -37,7 +39,7 @@ try:
 except KeyboardInterrupt:
   print("Exiting Loop...")
 
-nx.write_gml(G, path="steamBig.gml")
+nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
 
 end = time.time()
 
