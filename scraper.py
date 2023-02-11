@@ -4,11 +4,12 @@ import re
 import networkx as nx
 from bs4 import BeautifulSoup
 import time
+import html
 
 URL = "http://store.steampowered.com/explore/random/"
 G = nx.DiGraph()
 
-nodes = int(input("How many nodes?"))
+nodes = int(input("How many nodes? "))
 
 start = time.time()
 
@@ -35,11 +36,13 @@ try:
     #print(idTag['value'])
     #print(recList)
     for rec in recList:
-      G.add_edge(nameTag.text, rec[0])
+      print(html.unescape(nameTag.text) + " -> " + html.unescape(rec[0]))
+      G.add_edge(html.unescape(nameTag.text), html.unescape(rec[0]))
 except KeyboardInterrupt:
   print("Exiting Loop...")
 
-nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
+#nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
+nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
 
 end = time.time()
 
