@@ -10,7 +10,8 @@ G = nx.DiGraph()
 
 start = time.time()
 
-for z in range(5000):
+try:
+  for z in range(5000):
     print(z)
     recList = []
 
@@ -25,17 +26,19 @@ for z in range(5000):
     recsDict = json.loads(recString)['rgApps']
 
     for i in range(5):
-        recList.append((recsDict[list(recsDict.keys())[i]]
-                       ['name'], list(recsDict.keys())[i]))
+      if i < len(recsDict):
+        recList.append((recsDict[list(recsDict.keys())[i]]['name'], list(recsDict.keys())[i]))
 
     #print(nameTag.text)
-    # print(idTag['value'])
+    #print(idTag['value'])
     #print(recList)
     for rec in recList:
-        G.add_edge(nameTag.text, rec[0])
+      G.add_edge(nameTag.text, rec[0])
+except KeyboardInterrupt:
+  print("Exiting Loop...")
 
 nx.write_gml(G, path="steamBig.gml")
 
 end = time.time()
 
-print("Complete!\nFinished in: " + (end - start))
+print("Complete!\nFinished in: " + str(end - start))
