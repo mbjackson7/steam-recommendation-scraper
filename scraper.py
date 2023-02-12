@@ -68,7 +68,8 @@ def get_release_data(soup):
     releaseData = soup.find("div", class_="date")
     if releaseData is not None:
         releaseDate = releaseData.text.strip()
-        year = int(releaseDate[-4:])
+        if releaseDate[-4:].isnumeric():
+            year = int(releaseDate[-4:])
     return releaseDate, year
 
 
