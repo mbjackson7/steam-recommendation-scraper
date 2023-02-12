@@ -8,7 +8,7 @@ import html
 
 
 def get_price(soup):
-    price = -1
+    price = -1.0
     discount = 0
     purchaseTag = soup.find("div", class_="game_purchase_action_bg")
     if purchaseTag is not None:
@@ -17,15 +17,15 @@ def get_price(soup):
         discountTag = purchaseTag.find("div", class_="discount_pct")
         if priceTag is None:
             if disPriceTag is None or discountTag is None:
-                price = -2
+                price = -2.0
             else:
                 price = float(disPriceTag.text.strip().replace("$", ""))
                 discount = float(discountTag.text.strip().replace(
                     "%", "").replace("-", ""))
         elif priceTag.text.strip().find("Free") != -1:
-            price = 0
+            price = 0.0
         elif priceTag.text.strip()[0] != "$":
-            price = -1
+            price = -1.0
         else:
             price = float(priceTag.text.strip().replace("$", ""))
     return (price, discount)
@@ -46,19 +46,23 @@ def get_review_data(soup):
     recentReviews = -1
     allRating = "N/A"
     allReviews = -1
-    recentRatio = -1
+    recentRatio = 0.0
     if reviewData is not None:
         data = reviewData.find_all("div", class_="user_reviews_summary_row")
-        if len(data) == 2:
+        if len(data) > 0:
             recentRating = data[0].find(
                 "span", class_="game_review_summary").text.strip()
             recentReviews = int(re.sub('[(),]', "", data[0].find(
                 "span", class_="responsive_hidden").text.strip()))
+        if len(data) == 2:
             allRating = data[1].find(
                 "span", class_="game_review_summary").text.strip()
             allReviews = int(re.sub('[(),]', "", data[1].find(
                 "span", class_="responsive_hidden").text.strip()))
             recentRatio = recentReviews / allReviews
+        else:
+            allRating = recentRating
+            allReviews = recentReviews
     return (recentRating, recentReviews, allRating, allReviews, recentRatio)
 
 
