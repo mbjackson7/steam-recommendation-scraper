@@ -3,3 +3,4 @@
 .graphs
 *.gml
 *.gexf
+output.txt
