@@ -140,7 +140,7 @@ start = time.time()
 try:
     for z in range(nodes):
         if (z+1) % 10 == 0:
-            print("Node " + str(z) + " of " + str(nodes))
+            print("Node " + str(z+1) + " of " + str(nodes))
         if z % 100 == 0:
             print("Saving...")
             nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
