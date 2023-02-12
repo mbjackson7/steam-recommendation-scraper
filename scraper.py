@@ -6,11 +6,10 @@ from bs4 import BeautifulSoup
 import time
 import html
 
-def addNode(G, id, soup=None):
+def addNode(G, id, name, soup=None):
   if soup is None:
     page = requests.get("http://store.steampowered.com/app/" + str(id))
     soup = BeautifulSoup(page.text, 'html.parser')
-  name = soup.find("div", class_="apphub_AppName").text
   priceTag = soup.find("div", class_="game_purchase_price price")
   if priceTag is None:
     price = -2
@@ -21,10 +20,10 @@ def addNode(G, id, soup=None):
   else:
     price = float(priceTag.text.strip().replace("$", ""))
   tagsTags = soup.find_all("a", class_="app_tag")
-  tags = []
+  tags = ["", "", ""]
   for i in range(3):
     if i < len(tagsTags):
-      tags.append(tagsTags[i].text.strip())
+      tags[i]= tagsTags[i].text.strip()
 
   G.add_node(html.unescape(name), price=price, id=id, tag1=tags[0], tag2=tags[1], tag3=tags[2])
 
@@ -43,10 +42,16 @@ try:
 
     page = requests.get(URL)
     soup = BeautifulSoup(page.text, 'html.parser')
-    name = soup.find("div", class_="apphub_AppName").text
-    id = soup.find("div", class_="glance_tags popular_tags").attrs['data-appid']
+    nameTag = soup.find("div", class_="apphub_AppName")
+    if nameTag is None:
+      continue
+    name = nameTag.text.strip()
+    idTag = soup.find("div", class_="glance_tags popular_tags")
+    if idTag is None:
+      continue
+    id = idTag['data-appid']
     if not G.has_node(name):
-      addNode(G, id, soup)
+      addNode(G, id, name, soup)
 
     recommendations = re.search("{\"rgApps\".*", page.text)
     recString = recommendations.group(0)
@@ -63,11 +68,13 @@ try:
     #print(recList)
     for rec in recList:
       if not G.has_node(rec[0]):
-        addNode(G, rec[1])
-      print(html.unescape(name) + " -> " + html.unescape(rec[0]))
+        addNode(G, rec[1], rec[0])
+      #print(html.unescape(name) + " -> " + html.unescape(rec[0]))
       G.add_edge(html.unescape(name), html.unescape(rec[0]))
 except KeyboardInterrupt:
   print("Exiting Loop...")
+except AttributeError:
+  print("AttributeError: saving current progress...")
 
 #nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
 nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
