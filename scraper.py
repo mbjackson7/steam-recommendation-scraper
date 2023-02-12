@@ -142,7 +142,7 @@ def add_node(G, id, name, soup=None):
         franchise=franchise
     )
 
-
+VERSION = "0.1.0"
 URL = "http://store.steampowered.com/explore/random/"
 G = nx.DiGraph()
 
@@ -156,6 +156,7 @@ if useOld == "y":
     print("Loaded graph with " + str(len(G.nodes())) + " nodes")
 
 nodes = int(input(f"How many {newPrompt}source nodes? "))
+recCount = int(input("How many recommendations per source node? "))
 
 start = time.time()
 
@@ -165,7 +166,7 @@ try:
             print("Node " + str(z+1) + " of " + str(nodes))
         if z % 100 == 0:
             print("Saving...")
-            nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
+            nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}-{str(recCount)}-{VERSION}.gexf")
         page = requests.get(URL)
         soup = BeautifulSoup(page.text, 'html.parser')
         nameTag = soup.find("div", class_="apphub_AppName")
@@ -185,7 +186,7 @@ try:
         recString = recString.replace(");", "")
         recsDict = json.loads(recString)['rgApps']
 
-        for i in range(5):
+        for i in range(recCount):
             if i < len(recsDict):
                 id = list(recsDict.keys())[i]
                 recList.append((recsDict[id]['name'], id))
@@ -205,7 +206,7 @@ except AttributeError as e:
     print("❌ AttributeError: saving current progress...")
 
 # nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
-nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
+nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}-{str(recCount)}-{VERSION}.gexf")
 
 end = time.time()
 
