@@ -139,9 +139,11 @@ start = time.time()
 
 try:
     for z in range(nodes):
-        print(z+1)
-        recList = []
-
+        if (z+1) % 10 == 0:
+            print("Node " + str(z) + " of " + str(nodes))
+        if z % 100 == 0:
+            print("Saving...")
+            nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
         page = requests.get(URL)
         soup = BeautifulSoup(page.text, 'html.parser')
         nameTag = soup.find("div", class_="apphub_AppName")
@@ -155,6 +157,7 @@ try:
         if not G.has_node(name):
             add_node(G, id, name, soup)
 
+        recList = []
         recommendations = re.search("{\"rgApps\".*", page.text)
         recString = recommendations.group(0)
         recString = recString.replace(");", "")
