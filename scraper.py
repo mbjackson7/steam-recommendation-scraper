@@ -50,16 +50,23 @@ def get_review_data(soup):
     if reviewData is not None:
         data = reviewData.find_all("div", class_="user_reviews_summary_row")
         if len(data) > 0:
-            recentRating = data[0].find(
-                "span", class_="game_review_summary").text.strip()
-            recentReviews = int(re.sub('[(),]', "", data[0].find(
-                "span", class_="responsive_hidden").text.strip()))
+            recentRatingTag = data[0].find(
+                "span", class_="game_review_summary")
+            if recentRatingTag is not None:
+                recentRating = recentRatingTag.text.strip()
+            recentReviewsTag = data[0].find("span", class_="responsive_hidden")
+            if recentReviewsTag is not None:
+                recentReviews = int(re.sub('[(),]', "", recentReviewsTag.text.strip()))
         if len(data) == 2:
-            allRating = data[1].find(
-                "span", class_="game_review_summary").text.strip()
-            allReviews = int(re.sub('[(),]', "", data[1].find(
-                "span", class_="responsive_hidden").text.strip()))
-            recentRatio = recentReviews / allReviews
+            allRatingTag = data[1].find(
+                "span", class_="game_review_summary")
+            if allRatingTag is not None:
+                allRating = allRatingTag.text.strip()
+            allReviewsTag = data[1].find("span", class_="responsive_hidden")
+            if allReviewsTag is not None:
+                allReviews = int(re.sub('[(),]', "", allReviewsTag.text.strip()))
+            if allReviews != 0:
+                recentRatio = float(recentReviews / allReviews)
         else:
             allRating = recentRating
             allReviews = recentReviews
@@ -101,6 +108,8 @@ def get_genres_and_developer(soup):
 
 
 def add_node(G, id, name, soup=None):
+    print("Name: " + name)
+
     if soup is None:
         page = requests.get("http://store.steampowered.com/app/" + str(id))
         soup = BeautifulSoup(page.text, 'html.parser')
@@ -182,7 +191,8 @@ try:
             G.add_edge(html.unescape(name), html.unescape(rec[0]))
 except KeyboardInterrupt:
     print("Exiting Loop...")
-except AttributeError:
+except AttributeError as e:
+    print(e)
     print("❌ AttributeError: saving current progress...")
 
 # nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
