@@ -145,7 +145,16 @@ def add_node(G, id, name, soup=None):
 URL = "http://store.steampowered.com/explore/random/"
 G = nx.DiGraph()
 
-nodes = int(input("How many nodes? "))
+useOld = input("Add to existing graph? (y/n) ")
+newPrompt = ""
+if useOld == "y":
+    newPrompt = "new "
+    oldGraphName = input("Old graph name? ")
+    G = nx.read_gexf(f"./.graphs/{oldGraphName}.gexf")
+    print("Loading old graph...")
+    print("Loaded graph with " + str(len(G.nodes())) + " nodes")
+
+nodes = int(input(f"How many {newPrompt}source nodes? "))
 
 start = time.time()
 
