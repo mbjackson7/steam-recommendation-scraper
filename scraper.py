@@ -7,16 +7,26 @@ import time
 import html
 
 def getPrice(soup):
-  priceTag = soup.find("div", class_="game_purchase_price price")
-  if priceTag is None:
-    price = -2
-  elif priceTag.text.strip()[0:3] == "Free":
-    price = 0  
-  elif priceTag.text.strip()[0] != "$":
-    price = -1
-  else:
-    price = float(priceTag.text.strip().replace("$", ""))
-  return price
+  price = -1
+  discount = 0
+  purchaseTag = soup.find("div", class_="game_purchase_action_bg")
+  if purchaseTag is not None:
+    priceTag = purchaseTag.find("div", class_="game_purchase_price price")
+    disPriceTag = purchaseTag.find("div", class_="discount_final_price")
+    discountTag = purchaseTag.find("div", class_="discount_pct")
+    if priceTag is None:
+      if disPriceTag is None or discountTag is None:
+        price = -2
+      else:
+        price = float(disPriceTag.text.strip().replace("$", ""))
+        discount = float(discountTag.text.strip().replace("%", "").replace("-", ""))
+    elif priceTag.text.strip().find("Free") != -1:
+      price = 0  
+    elif priceTag.text.strip()[0] != "$":
+      price = -1
+    else:
+      price = float(priceTag.text.strip().replace("$", ""))
+  return (price, discount)
 
 def getTags(soup):
   tagsTags = soup.find_all("a", class_="app_tag")
@@ -30,10 +40,10 @@ def addNode(G, id, name, soup=None):
   if soup is None:
     page = requests.get("http://store.steampowered.com/app/" + str(id))
     soup = BeautifulSoup(page.text, 'html.parser')
-  price = getPrice(soup)
+  price, discount = getPrice(soup)
   tags = getTags(soup)
 
-  G.add_node(html.unescape(name), price=price, id=id, tag1=tags[0], tag2=tags[1], tag3=tags[2])
+  G.add_node(html.unescape(name), id=id, price=price, discount=discount, tag1=tags[0], tag2=tags[1], tag3=tags[2])
 
 
 URL = "http://store.steampowered.com/explore/random/"
@@ -82,7 +92,7 @@ try:
 except KeyboardInterrupt:
   print("Exiting Loop...")
 except AttributeError:
-  print("AttributeError: saving current progress...")
+  print("❌ AttributeError: saving current progress...")
 
 #nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
 nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}.gexf")
