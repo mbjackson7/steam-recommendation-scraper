@@ -6,10 +6,7 @@ from bs4 import BeautifulSoup
 import time
 import html
 
-def addNode(G, id, name, soup=None):
-  if soup is None:
-    page = requests.get("http://store.steampowered.com/app/" + str(id))
-    soup = BeautifulSoup(page.text, 'html.parser')
+def getPrice(soup):
   priceTag = soup.find("div", class_="game_purchase_price price")
   if priceTag is None:
     price = -2
@@ -19,11 +16,22 @@ def addNode(G, id, name, soup=None):
     price = -1
   else:
     price = float(priceTag.text.strip().replace("$", ""))
+  return price
+
+def getTags(soup):
   tagsTags = soup.find_all("a", class_="app_tag")
   tags = ["", "", ""]
   for i in range(3):
     if i < len(tagsTags):
       tags[i]= tagsTags[i].text.strip()
+  return tags
+
+def addNode(G, id, name, soup=None):
+  if soup is None:
+    page = requests.get("http://store.steampowered.com/app/" + str(id))
+    soup = BeautifulSoup(page.text, 'html.parser')
+  price = getPrice(soup)
+  tags = getTags(soup)
 
   G.add_node(html.unescape(name), price=price, id=id, tag1=tags[0], tag2=tags[1], tag3=tags[2])
 
