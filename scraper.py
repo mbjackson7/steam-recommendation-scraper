@@ -20,7 +20,7 @@ def get_price(soup):
                 price = -2.0
             else:
                 price = float(disPriceTag.text.strip().replace("$", ""))
-                discount = float(discountTag.text.strip().replace(
+                discount = int(discountTag.text.strip().replace(
                     "%", "").replace("-", ""))
         elif priceTag.text.strip().find("Free") != -1:
             price = 0.0
@@ -108,8 +108,7 @@ def get_genres_and_developer(soup):
 
 
 def add_node(G, id, name, soup=None):
-    print("Name: " + name)
-
+    #print("Name: " + name)
     if soup is None:
         page = requests.get("http://store.steampowered.com/app/" + str(id))
         soup = BeautifulSoup(page.text, 'html.parser')
