@@ -57,6 +57,7 @@ def get_review_data(soup):
             recentReviewsTag = data[0].find("span", class_="responsive_hidden")
             if recentReviewsTag is not None:
                 recentReviews = int(re.sub('[(),]', "", recentReviewsTag.text.strip()))
+                recentRatio = 1.0
         if len(data) == 2:
             allRatingTag = data[1].find(
                 "span", class_="game_review_summary")
