@@ -222,6 +222,7 @@ def main():
             # print(nameTag.text)
             # print(idTag['value'])
             # print(recList)
+            weight = recCount
             for rec in recList:
                 refID, refName = rec[0], rec[1]
                 if not G.has_node(refName) and refID not in dlcList:
@@ -229,7 +230,8 @@ def main():
                         dlcList.append(refID)
                         continue
                 # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
-                G.add_edge(html.unescape(name), html.unescape(refName))
+                G.add_edge(html.unescape(name), html.unescape(refName), weight=weight)
+                weight -= 1
     except KeyboardInterrupt:
         print("Exiting Loop...")
     except AttributeError as e:
