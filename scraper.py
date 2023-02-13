@@ -223,13 +223,13 @@ def main():
             # print(idTag['value'])
             # print(recList)
             for rec in recList:
-                id, name = rec
-                if not G.has_node(name) and id not in dlcList:
-                    if add_node(G, id, name).isnumeric():
-                        dlcList.append(id)
+                refID, refName = rec[0], rec[1]
+                if not G.has_node(refName) and refID not in dlcList:
+                    if add_node(G, refID, refName).isnumeric():
+                        dlcList.append(refID)
                         continue
                 # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
-                G.add_edge(html.unescape(name), html.unescape(rec[0]))
+                G.add_edge(html.unescape(name), html.unescape(refName))
     except KeyboardInterrupt:
         print("Exiting Loop...")
     except AttributeError as e:
