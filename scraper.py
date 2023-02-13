@@ -109,12 +109,20 @@ def get_genres_and_developer(soup):
                 franchise = developerData[2].find("a").text.strip()
     return genres, developer, publisher, franchise
 
+def is_dlc(soup):
+    dlc = False
+    dlcTag = soup.find("div", class_="game_area_dlc_bubble")
+    if dlcTag is not None:
+        dlc = True
+    return dlc
 
 def add_node(G, id, name, soup=None):
     # print("Name: " + name)
     if soup is None:
         page = requests.get("http://store.steampowered.com/app/" + str(id))
         soup = BeautifulSoup(page.text, 'html.parser')
+    if is_dlc(soup):
+        return str(id)
     price, discount = get_price(soup)
     tags = get_tags(soup)
     releaseDate, year = get_release_data(soup)
@@ -143,18 +151,21 @@ def add_node(G, id, name, soup=None):
         publisher=publisher,
         franchise=franchise
     )
+    return "added"
 
 
 def main():
-    VERSION = "0.1.1"
+    VERSION = "0.2.2"
     URL = "http://store.steampowered.com/explore/random/"
     G = nx.DiGraph()
-
-    print("Welcome to Steam Recommendation Scraper v" + VERSION)
-    useOld = input("Add to existing graph? (y/n) ")
     oldRecCount = False
     oldNodeCount = 0
     newPrompt = ""
+    dlcList = []
+
+    print("Welcome to Steam Recommendation Scraper v" + VERSION)
+    useOld = input("Add to existing graph? (y/n) ")
+    
     if useOld == "y":
         newPrompt = "new "
         oldGraphName = input("Old graph name? ")
@@ -175,8 +186,8 @@ def main():
 
     try:
         for z in range(nodes):
-            if z % 100 == 0:
-                print("Node " + str(z) + " of " + str(nodes))
+            if z+1 % 100 == 0:
+                print("Node " + str(z+1) + " of " + str(nodes))
                 print("Elapsed time: " + str(time.time() - start) + " seconds")
                 print(
                     f"Saving steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf...")
@@ -192,8 +203,10 @@ def main():
             if idTag is None:
                 continue
             id = idTag['data-appid']
-            if not G.has_node(name):
-                add_node(G, id, name, soup)
+            if not G.has_node(name) and id not in dlcList:
+                if add_node(G, id, name, soup).isnumeric():
+                    dlcList.append(id)
+                    continue
 
             recList = []
             recommendations = re.search("{\"rgApps\".*", page.text)
@@ -204,14 +217,17 @@ def main():
             for i in range(recCount):
                 if i < len(recsDict):
                     id = list(recsDict.keys())[i]
-                    recList.append((recsDict[id]['name'], id))
+                    recList.append((id, recsDict[id]['name']))
 
             # print(nameTag.text)
             # print(idTag['value'])
             # print(recList)
             for rec in recList:
-                if not G.has_node(rec[0]):
-                    add_node(G, rec[1], rec[0])
+                id, name = rec
+                if not G.has_node(name) and id not in dlcList:
+                    if add_node(G, id, name).isnumeric():
+                        dlcList.append(id)
+                        continue
                 # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
                 G.add_edge(html.unescape(name), html.unescape(rec[0]))
     except KeyboardInterrupt:
