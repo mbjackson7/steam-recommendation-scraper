@@ -182,6 +182,7 @@ def main():
     if not oldRecCount:
         recCount = int(input("How many recommendations per source node? "))
 
+    print("Starting scrape...")
     start = time.time()
 
     try:
