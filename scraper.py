@@ -189,7 +189,7 @@ def main():
 
     try:
         for z in range(nodes):
-            if z+1 % 100 == 0:
+            if (z+1) % 100 == 0:
                 print("Node " + str(z+1) + " of " + str(nodes))
                 print("Elapsed time: " + str(time.time() - start) + " seconds")
                 print(
