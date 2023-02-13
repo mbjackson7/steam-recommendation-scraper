@@ -146,6 +146,7 @@ VERSION = "0.1.1"
 URL = "http://store.steampowered.com/explore/random/"
 G = nx.DiGraph()
 
+print("Welcome to Steam Recommendation Scraper v" + VERSION)
 useOld = input("Add to existing graph? (y/n) ")
 oldRecCount = False
 oldNodeCount = 0
@@ -218,4 +219,4 @@ nx.write_gexf(G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}
 
 end = time.time()
 
-print("Complete!\nFinished in: " + str(end - start))
+print(f"Complete!\nSaved to steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf\nFinished in: " + str(end - start))
