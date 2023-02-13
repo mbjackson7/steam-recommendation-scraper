@@ -154,7 +154,7 @@ newPrompt = ""
 if useOld == "y":
     newPrompt = "new "
     oldGraphName = input("Old graph name? ")
-    G = nx.read_gexf(f"./.graphs/{oldGraphName}.gexf")
+    G = nx.read_gexf(f"./.graphs/{oldGraphName}")
     print("Loading old graph...")
     print("Loaded graph with " + str(len(G.nodes())) + " nodes")
     oldNodeCount = int(oldGraphName.split("-")[0].replace("steam", ""))
