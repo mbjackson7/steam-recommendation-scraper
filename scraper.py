@@ -174,7 +174,7 @@ try:
         if (z+1) % 10 == 0:
             print("Node " + str(z+1) + " of " + str(nodes))
         if z % 100 == 0:
-            print("Saving...")
+            print(f"Saving steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf...")
             nx.write_gexf(G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
         page = requests.get(URL)
         soup = BeautifulSoup(page.text, 'html.parser')
