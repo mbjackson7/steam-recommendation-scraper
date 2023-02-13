@@ -56,7 +56,8 @@ def get_review_data(soup):
                 recentRating = recentRatingTag.text.strip()
             recentReviewsTag = data[0].find("span", class_="responsive_hidden")
             if recentReviewsTag is not None:
-                recentReviews = int(re.sub('[(),]', "", recentReviewsTag.text.strip()))
+                recentReviews = int(
+                    re.sub('[(),]', "", recentReviewsTag.text.strip()))
                 recentRatio = 1.0
         if len(data) == 2:
             allRatingTag = data[1].find(
@@ -65,7 +66,8 @@ def get_review_data(soup):
                 allRating = allRatingTag.text.strip()
             allReviewsTag = data[1].find("span", class_="responsive_hidden")
             if allReviewsTag is not None:
-                allReviews = int(re.sub('[(),]', "", allReviewsTag.text.strip()))
+                allReviews = int(
+                    re.sub('[(),]', "", allReviewsTag.text.strip()))
             if allReviews != 0:
                 recentRatio = float(recentReviews / allReviews)
         else:
@@ -109,7 +111,7 @@ def get_genres_and_developer(soup):
 
 
 def add_node(G, id, name, soup=None):
-    #print("Name: " + name)
+    # print("Name: " + name)
     if soup is None:
         page = requests.get("http://store.steampowered.com/app/" + str(id))
         soup = BeautifulSoup(page.text, 'html.parser')
@@ -142,81 +144,91 @@ def add_node(G, id, name, soup=None):
         franchise=franchise
     )
 
-VERSION = "0.1.1"
-URL = "http://store.steampowered.com/explore/random/"
-G = nx.DiGraph()
 
-print("Welcome to Steam Recommendation Scraper v" + VERSION)
-useOld = input("Add to existing graph? (y/n) ")
-oldRecCount = False
-oldNodeCount = 0
-newPrompt = ""
-if useOld == "y":
-    newPrompt = "new "
-    oldGraphName = input("Old graph name? ")
-    G = nx.read_gexf(f"./.graphs/{oldGraphName}")
-    print("Loading old graph...")
-    print("Loaded graph with " + str(len(G.nodes())) + " nodes")
-    oldNodeCount = int(oldGraphName.split("-")[0].replace("steam", ""))
-    oldSettings = input("Use previous settings? (y/n) ")
-    if oldSettings == "y":
-        oldRecCount = True
-        recCount = int(oldGraphName.split("-")[1])
-        
-nodes = int(input(f"How many {newPrompt}source nodes? "))
-if not oldRecCount:
-    recCount = int(input("How many recommendations per source node? "))
+def main():
+    VERSION = "0.1.1"
+    URL = "http://store.steampowered.com/explore/random/"
+    G = nx.DiGraph()
 
-start = time.time()
+    print("Welcome to Steam Recommendation Scraper v" + VERSION)
+    useOld = input("Add to existing graph? (y/n) ")
+    oldRecCount = False
+    oldNodeCount = 0
+    newPrompt = ""
+    if useOld == "y":
+        newPrompt = "new "
+        oldGraphName = input("Old graph name? ")
+        G = nx.read_gexf(f"./.graphs/{oldGraphName}")
+        print("Loading old graph...")
+        print("Loaded graph with " + str(len(G.nodes())) + " nodes")
+        oldNodeCount = int(oldGraphName.split("-")[0].replace("steam", ""))
+        oldSettings = input("Use previous settings? (y/n) ")
+        if oldSettings == "y":
+            oldRecCount = True
+            recCount = int(oldGraphName.split("-")[1])
 
-try:
-    for z in range(nodes):
-        if (z+1) % 10 == 0:
-            print("Node " + str(z+1) + " of " + str(nodes))
-        if z % 100 == 0:
-            print(f"Saving steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf...")
-            nx.write_gexf(G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
-        page = requests.get(URL)
-        soup = BeautifulSoup(page.text, 'html.parser')
-        nameTag = soup.find("div", class_="apphub_AppName")
-        if nameTag is None:
-            continue
-        name = nameTag.text.strip()
-        idTag = soup.find("div", class_="glance_tags popular_tags")
-        if idTag is None:
-            continue
-        id = idTag['data-appid']
-        if not G.has_node(name):
-            add_node(G, id, name, soup)
+    nodes = int(input(f"How many {newPrompt}source nodes? "))
+    if not oldRecCount:
+        recCount = int(input("How many recommendations per source node? "))
 
-        recList = []
-        recommendations = re.search("{\"rgApps\".*", page.text)
-        recString = recommendations.group(0)
-        recString = recString.replace(");", "")
-        recsDict = json.loads(recString)['rgApps']
+    start = time.time()
 
-        for i in range(recCount):
-            if i < len(recsDict):
-                id = list(recsDict.keys())[i]
-                recList.append((recsDict[id]['name'], id))
+    try:
+        for z in range(nodes):
+            if z % 100 == 0:
+                print("Node " + str(z) + " of " + str(nodes))
+                print("Elapsed time: " + str(time.time() - start) + " seconds")
+                print(
+                    f"Saving steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf...")
+                nx.write_gexf(
+                    G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
+            page = requests.get(URL)
+            soup = BeautifulSoup(page.text, 'html.parser')
+            nameTag = soup.find("div", class_="apphub_AppName")
+            if nameTag is None:
+                continue
+            name = nameTag.text.strip()
+            idTag = soup.find("div", class_="glance_tags popular_tags")
+            if idTag is None:
+                continue
+            id = idTag['data-appid']
+            if not G.has_node(name):
+                add_node(G, id, name, soup)
 
-        # print(nameTag.text)
-        # print(idTag['value'])
-        # print(recList)
-        for rec in recList:
-            if not G.has_node(rec[0]):
-                add_node(G, rec[1], rec[0])
-            # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
-            G.add_edge(html.unescape(name), html.unescape(rec[0]))
-except KeyboardInterrupt:
-    print("Exiting Loop...")
-except AttributeError as e:
-    print(e)
-    print("❌ AttributeError: saving current progress...")
+            recList = []
+            recommendations = re.search("{\"rgApps\".*", page.text)
+            recString = recommendations.group(0)
+            recString = recString.replace(");", "")
+            recsDict = json.loads(recString)['rgApps']
 
-# nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
-nx.write_gexf(G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
+            for i in range(recCount):
+                if i < len(recsDict):
+                    id = list(recsDict.keys())[i]
+                    recList.append((recsDict[id]['name'], id))
 
-end = time.time()
+            # print(nameTag.text)
+            # print(idTag['value'])
+            # print(recList)
+            for rec in recList:
+                if not G.has_node(rec[0]):
+                    add_node(G, rec[1], rec[0])
+                # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
+                G.add_edge(html.unescape(name), html.unescape(rec[0]))
+    except KeyboardInterrupt:
+        print("Exiting Loop...")
+    except AttributeError as e:
+        print(e)
+        print("❌ AttributeError: saving current progress...")
 
-print(f"Complete!\nSaved to steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf\nFinished in: " + str(end - start))
+    # nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
+    nx.write_gexf(
+        G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
+
+    end = time.time()
+
+    print(
+        f"Complete!\nSaved to steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf\nFinished in: {str(end - start)} seconds")
+
+
+if __name__ == "__main__":
+    main()
