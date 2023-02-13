@@ -142,11 +142,13 @@ def add_node(G, id, name, soup=None):
         franchise=franchise
     )
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 URL = "http://store.steampowered.com/explore/random/"
 G = nx.DiGraph()
 
 useOld = input("Add to existing graph? (y/n) ")
+oldRecCount = False
+oldNodeCount = 0
 newPrompt = ""
 if useOld == "y":
     newPrompt = "new "
@@ -154,9 +156,15 @@ if useOld == "y":
     G = nx.read_gexf(f"./.graphs/{oldGraphName}.gexf")
     print("Loading old graph...")
     print("Loaded graph with " + str(len(G.nodes())) + " nodes")
-
+    oldNodeCount = int(oldGraphName.split("-")[0].replace("steam", ""))
+    oldSettings = input("Use old settings? (y/n) ")
+    if oldSettings == "y":
+        oldRecCount = True
+        recCount = int(oldGraphName.split("-")[1])
+        
 nodes = int(input(f"How many {newPrompt}source nodes? "))
-recCount = int(input("How many recommendations per source node? "))
+if not oldSettings:
+    recCount = int(input("How many recommendations per source node? "))
 
 start = time.time()
 
@@ -166,7 +174,7 @@ try:
             print("Node " + str(z+1) + " of " + str(nodes))
         if z % 100 == 0:
             print("Saving...")
-            nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}-{str(recCount)}-{VERSION}.gexf")
+            nx.write_gexf(G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
         page = requests.get(URL)
         soup = BeautifulSoup(page.text, 'html.parser')
         nameTag = soup.find("div", class_="apphub_AppName")
@@ -206,7 +214,7 @@ except AttributeError as e:
     print("❌ AttributeError: saving current progress...")
 
 # nx.write_gml(G, path=f"./.graphs/steam{str(nodes)}.gml")
-nx.write_gexf(G, path=f"./.graphs/steam{str(nodes)}-{str(recCount)}-{VERSION}.gexf")
+nx.write_gexf(G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
 
 end = time.time()
 
