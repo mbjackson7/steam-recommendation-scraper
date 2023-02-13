@@ -155,7 +155,7 @@ def add_node(G, id, name, soup=None):
 
 
 def main():
-    VERSION = "0.2.2"
+    VERSION = "1.0.0"
     URL = "http://store.steampowered.com/explore/random/"
     G = nx.DiGraph()
     oldRecCount = False
