@@ -55,4 +55,4 @@ There are a few things to note regarding the current state of this software.
 
 First, the URL used to find source nodes, [http://store.steampowered.com/explore/random/](http://store.steampowered.com/explore/random/), does not provide a random game from all games on Steam. Obscene games that require login are omitted from this URL, as well as all recommendations. There may be other unknown constraints on how this URL operates.
 
-The URL does seems to only recommends games themselves, not DLC, though the same cannot be said for the recommendations, which include DLC. There may be an option to filter these out and prevent them from being added to the graph in future versions.
+The URL does seems to only recommends games themselves, not DLC, though the same cannot be said for the recommendations, which include DLC. DLC are, however, blocked from being added to the graph.
