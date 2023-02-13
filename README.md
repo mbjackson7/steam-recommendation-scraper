@@ -1,6 +1,6 @@
 # Python Steam Store Recommendations Web Scraper
 
-A simple python web scraper that will construct and export a graph of Steam store recommendations.
+A simple Python web scraper that will construct and export a graph of Steam store recommendations.
 
 The scraper randomly loads a set number of Steam store pages set by the user at runtime, also known as source nodes. The graph is created using the [NetworkX](https://networkx.org/documentation/stable/index.html) library for Python, and exported in [GEFX](https://gexf.net/) format.
 
