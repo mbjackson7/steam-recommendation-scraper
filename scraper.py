@@ -157,13 +157,13 @@ if useOld == "y":
     print("Loading old graph...")
     print("Loaded graph with " + str(len(G.nodes())) + " nodes")
     oldNodeCount = int(oldGraphName.split("-")[0].replace("steam", ""))
-    oldSettings = input("Use old settings? (y/n) ")
+    oldSettings = input("Use previous settings? (y/n) ")
     if oldSettings == "y":
         oldRecCount = True
         recCount = int(oldGraphName.split("-")[1])
         
 nodes = int(input(f"How many {newPrompt}source nodes? "))
-if not oldSettings:
+if not oldRecCount:
     recCount = int(input("How many recommendations per source node? "))
 
 start = time.time()
