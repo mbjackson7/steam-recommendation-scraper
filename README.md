@@ -43,7 +43,7 @@ This question will always be asked, and just means how many times a random Steam
 ## Execution
 Now what is left to do is wait. This can be timely based on internet speed and the numbers of requests being made. With base configuration, the user will be notified of overall progress every 100 source nodes and the graph file will be saved. If the user sends `SIGINT` during during parsing, the program will catch the exception and allow the graph to be exported one final time.
 
-As mentioned, graphs are exported in [GEXF](https://gexf.net/) format by default, though this can easily be changed to any of NetworkX's supported formats.
+As mentioned, graphs are exported in [GEXF](https://gexf.net/) format by default, though this can easily be changed to any of NetworkX's many [supported formats](https://networkx.org/documentation/stable/reference/readwrite/index.html#), including multiple JSON-based formats.
 
 ## Using Your Graphs
 Generated graphs are output into the `.graphs` directory, and can be used from there or copied elsewhere. Graph files **MUST** be in the `.graphs` directory if you intend to import them as an existing graph.
@@ -55,4 +55,4 @@ There are a few things to note regarding the current state of this software.
 
 First, the URL used to find source nodes, [http://store.steampowered.com/explore/random/](http://store.steampowered.com/explore/random/), does not provide a random game from all games on Steam. Obscene games that require login are omitted from this URL, as well as all recommendations. There may be other unknown constraints on how this URL operates.
 
-The URL does seems to only recommends games themselves, not DLC, though the same cannot be said for the recommendations, which include DLC. DLC are, however, blocked from being added to the graph.
+The URL does seem to only recommend games themselves, not DLC, though the same cannot be said for the recommendations, which include DLC. DLC are, however, blocked from being added to the graph.
