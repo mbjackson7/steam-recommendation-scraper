@@ -109,12 +109,14 @@ def get_genres_and_developer(soup):
                 franchise = developerData[2].find("a").text.strip()
     return genres, developer, publisher, franchise
 
+
 def is_dlc(soup):
     dlc = False
     dlcTag = soup.find("div", class_="game_area_dlc_bubble")
     if dlcTag is not None:
         dlc = True
     return dlc
+
 
 def add_node(G, id, name, soup=None):
     # print("Name: " + name)
@@ -165,7 +167,7 @@ def main():
 
     print("Welcome to Steam Recommendation Scraper v" + VERSION)
     useOld = input("Add to existing graph? (y/n) ")
-    
+
     if useOld == "y":
         newPrompt = "new "
         oldGraphName = input("Old graph name? ")
@@ -231,7 +233,8 @@ def main():
                         dlcList.append(refID)
                         continue
                 # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
-                G.add_edge(html.unescape(name), html.unescape(refName), weight=weight)
+                G.add_edge(html.unescape(name),
+                           html.unescape(refName), weight=weight)
                 weight -= 1
     except KeyboardInterrupt:
         print("Exiting Loop...")
