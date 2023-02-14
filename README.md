@@ -39,7 +39,13 @@ Once a graph is loaded, you will be asked if you would like to use previous sett
 ```
 How many new source nodes? 
 ```
-This question will always be asked, and just means how many times a random Steam game should be requested. After this, execution will begin.
+This question will always be asked, and just means how many times a random Steam game should be requested.
+```
+Delay between requests (seconds)? (Press Enter For the Recommended Value, 1.0) 
+```
+This value is important for rate limiting your requests to the Steam web servers. If requests were not limited, it is likely large scrapes will result in your IP address being banned by the Steam web servers, losing access to the Steam store.
+
+After this, execution will begin.
 ## Execution
 Now what is left to do is wait. This can be timely based on internet speed and the numbers of requests being made. With base configuration, the user will be notified of overall progress every 100 source nodes and the graph file will be saved. If the user creates `KeyboardInterrupt` exception during during parsing, the program will catch the exception and allow the graph to be exported one final time.
 

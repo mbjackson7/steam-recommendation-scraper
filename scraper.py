@@ -5,6 +5,16 @@ import networkx as nx
 from bs4 import BeautifulSoup
 import time
 import html
+lastRequestTime = 0.0
+
+def request_page(url, requestDelay=1.0):
+  global lastRequestTime
+  waitTime = requestDelay - (time.time() - lastRequestTime)
+  if waitTime > 0:
+    print("Waiting " + str(waitTime) + " seconds...")
+    time.sleep(waitTime)
+  lastRequestTime = time.time()
+  return requests.get(url)
 
 
 def get_price(soup):
@@ -118,10 +128,10 @@ def is_dlc(soup):
     return dlc
 
 
-def add_node(G, id, name, soup=None):
+def add_node(G, id, name, requestDelay=1.0, soup=None):
     # print("Name: " + name)
     if soup is None:
-        page = requests.get("http://store.steampowered.com/app/" + str(id))
+        page = request_page("http://store.steampowered.com/app/" + str(id), requestDelay)
         soup = BeautifulSoup(page.text, 'html.parser')
     if is_dlc(soup):
         return str(id)
@@ -157,14 +167,14 @@ def add_node(G, id, name, soup=None):
 
 
 def main():
-    VERSION = "1.0.0"
-    URL = "http://store.steampowered.com/explore/random/"
+    VERSION = "1.1.0"
+    RANDOM_URL = "http://store.steampowered.com/explore/random/"
     G = nx.DiGraph()
     oldRecCount = False
     oldNodeCount = 0
     newPrompt = ""
     dlcList = []
-
+    
     print("Welcome to Steam Recommendation Scraper v" + VERSION)
     useOld = input("Add to existing graph? (y/n) ")
 
@@ -184,6 +194,13 @@ def main():
     if not oldRecCount:
         recCount = int(input("How many recommendations per source node? "))
 
+    requestDelay = input("Delay between requests (seconds)? (Press Enter For the Recommended Value, 1.0) ")
+
+    if requestDelay == "":
+        requestDelay = 1.0
+    else:
+        requestDelay = float(requestDelay)
+
     print("Starting scrape...")
     start = time.time()
 
@@ -196,7 +213,7 @@ def main():
                     f"Saving steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf...")
                 nx.write_gexf(
                     G, path=f"./.graphs/steam{str(oldNodeCount+nodes)}-{str(recCount)}-{VERSION}.gexf")
-            page = requests.get(URL)
+            page = request_page(RANDOM_URL, requestDelay)
             soup = BeautifulSoup(page.text, 'html.parser')
             nameTag = soup.find("div", class_="apphub_AppName")
             if nameTag is None:
@@ -207,7 +224,7 @@ def main():
                 continue
             id = idTag['data-appid']
             if not G.has_node(name) and id not in dlcList:
-                if add_node(G, id, name, soup).isnumeric():
+                if add_node(G, id, name, requestDelay, soup).isnumeric():
                     dlcList.append(id)
                     continue
 
@@ -229,7 +246,7 @@ def main():
             for rec in recList:
                 refID, refName = rec[0], rec[1]
                 if not G.has_node(refName) and refID not in dlcList:
-                    if add_node(G, refID, refName).isnumeric():
+                    if add_node(G, refID, refName, requestDelay).isnumeric():
                         dlcList.append(refID)
                         continue
                 # print(html.unescape(name) + " -> " + html.unescape(rec[0]))
