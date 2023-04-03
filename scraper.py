@@ -134,13 +134,16 @@ def add_node(G, id, name, requestDelay=1.0, soup=None):
         page = request_page("http://store.steampowered.com/app/" + str(id), requestDelay)
         soup = BeautifulSoup(page.text, 'html.parser')
     if is_dlc(soup):
-        return str(id)
+        return "invalid"
     price, discount = get_price(soup)
     tags = get_tags(soup)
     releaseDate, year = get_release_data(soup)
     recentRating, recentReviews, allRating, allReviews, recentRatio = get_review_data(
         soup)
     genres, developer, publisher, franchise = get_genres_and_developer(soup)
+
+    if year == 0:
+        return "invalid"
 
     G.add_node(
         html.unescape(name),
@@ -246,7 +249,7 @@ def main():
             for rec in recList:
                 refID, refName = rec[0], rec[1]
                 if not G.has_node(refName) and refID not in dlcList:
-                    if add_node(G, refID, refName, requestDelay).isnumeric():
+                    if add_node(G, refID, refName, requestDelay) == "invalid":
                         dlcList.append(refID)
                         continue
                 # print(html.unescape(name) + " -> " + html.unescape(rec[0]))

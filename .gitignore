@@ -1,6 +1,7 @@
 .venv
 .vscode
 .graphs
+.analysis
 *.gml
 *.gexf
 output.txt
