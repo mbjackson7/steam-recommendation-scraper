@@ -1,16 +1,20 @@
-import json
-import re
-import networkx as nx
-import time
-import random
+'''
+Simulation class for Chapter 7 Tutorial of Intro Network Science book
+
+Copyright 2018 Indiana University and Cambridge University Press
+'''
+
 from collections import Counter
 from operator import itemgetter
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import networkx as nx
+
 
 class StopCondition(StopIteration):
     pass
+
 class Simulation:
     '''Simulate state transitions on a network'''
 
@@ -207,150 +211,3 @@ class Simulation:
                     "Stop condition met at step %i." % self.steps
                     )
                 break
-
-
-# SIS functions
-def initial_state(G):
-    state = {}
-    for node in G.nodes:
-        state[node] = 'S'
-    
-    patient_zero = random.choice(list(G.nodes))
-    state[patient_zero] = 'I'
-    return state
-
-MU = 0.2
-BETA = 0.1
-
-def state_transition(G, current_state, mode='SIS'):
-    next_state = {}
-    for node in G.nodes:
-        if current_state[node] == 'I':
-            if random.random() < MU:
-                if mode == 'SIS':
-                    next_state[node] = 'S'
-                elif mode == 'SIR':
-                    next_state[node] = 'R'
-        elif current_state[node] == 'S':
-            for neighbor in G.neighbors(node):
-                if current_state[neighbor] == 'I':
-                    if random.random() < BETA:
-                        next_state[node] = 'I'
-
-    return next_state
-
-def get_state_lists(G, current_state):
-    susceptibles = []
-    infectees = []
-    recovered = []
-    for node in G.nodes:
-        if current_state[node] == 'I':
-            infectees.append(node)
-        elif current_state[node] == 'S':
-            susceptibles.append(node)
-        else:
-            recovered.append(node)
-    return susceptibles, infectees, recovered
-
-def run_sis(G, iterations=10):
-    current_state = initial_state(G)
-    _, infectees, _ = get_state_lists(G, current_state)
-    patient_zero = infectees[0]
-    for _ in range(iterations):
-        current_state = state_transition(G, current_state)
-    susceptibles, infectees, recovered = get_state_lists(G, current_state)
-    return patient_zero, len(susceptibles), len(infectees), len(recovered)
-
-def run_sir(G, iterations=10):
-    current_state = initial_state(G)
-    _, infectees, _ = get_state_lists(G, current_state)
-    patient_zero = infectees[0]
-    for _ in range(iterations):
-        current_state = state_transition(G, current_state, mode='SIR')
-    susceptibles, infectees, recovered = get_state_lists(G, current_state)
-    return patient_zero, len(susceptibles), len(infectees), len(recovered)
-
-def spreading_analysis(G, probability=0.2, iterations=10):
-    
-    def spread(root, G, node, probability, currIter, iterations, spreads):
-        if currIter >= iterations:
-            return
-        for neighbor in G.neighbors(node):
-            if random.random() < probability:
-                spreads[root].append(neighbor)
-                spread(root, G, neighbor, probability, currIter + 1, iterations, spreads)
-
-    spreads = {}
-    for node in G.nodes():
-        currIter = 0
-        spreads[node] = []
-        spread(node, G, node, probability, currIter, iterations, spreads)
-        
-    return spreads
-                
-def main():
-    VERSION = "0.0.1"
-    G = nx.DiGraph()
-
-    print("Welcome to Steam Recommendation Analyzer v" + VERSION)
-
-    oldGraphName = input("Graph name? ")
-    G = nx.read_gexf(f"./.graphs/{oldGraphName}")
-    print("Loading graph...")
-    print("Loaded graph with " + str(len(G.nodes())) + " nodes")
-    nodeCount = int(oldGraphName.split("-")[0].replace("steam", ""))
-    recCount = int(oldGraphName.split("-")[1])
-    
-    print("Analyzing graph...")
-    print("Graph has " + str(len(G.nodes())) + " nodes")
-    print("Graph has " + str(len(G.edges())) + " edges")
-    print("Graph has " + str(nx.number_weakly_connected_components(G)) + " weakly connected components")
-    print("Graph has " + str(nx.number_strongly_connected_components(G)) + " strongly connected components")
-    print("Graph has " + str(nx.number_connected_components(G.to_undirected())) + " connected components")
-    
-    print("Calculating degree centrality...")
-    degreeCentrality = nx.degree_centrality(G)
-    print("Degree centrality is " + str(degreeCentrality))
-    print("Calculating betweenness centrality...")
-    betweennessCentrality = nx.betweenness_centrality(G)
-    print("Betweenness centrality is " + str(betweennessCentrality))
-    print("Calculating closeness centrality...")
-    closenessCentrality = nx.closeness_centrality(G)
-    print("Closeness centrality is " + str(closenessCentrality))
-
-    # print("Calculating spreading...")
-    # spreads = spreading_analysis(G)
-    
-    # sis = {}
-    # sir = {}
-
-    # for _ in range(50):
-    #     root, susceptibles, infectees, recovered = run_sis(G)
-    #     sis[root] = {
-    #         "susceptibles": susceptibles,
-    #         "infectees": infectees,
-    #         "recovered": recovered
-    #     }
-    #     root, susceptibles, infectees, recovered = run_sir(G)
-    #     sir[root] = {
-    #         "susceptibles": susceptibles,
-    #         "infectees": infectees,
-    #         "recovered": recovered
-    #     }
-
-    sim = Simulation(G, initial_state, state_transition, name='SIS model')
-    sim.run(25)
-    sim.draw()
-    sim.plot()
-            
-    print("Saving results...")
-    with open(f"./.analysis/{oldGraphName}.json", "w") as f:
-        json.dump({
-            "degreeCentrality": degreeCentrality,
-            "betweennessCentrality": betweennessCentrality,
-            "closenessCentrality": closenessCentrality,
-        }, f)
-        
-    print("Done!")
-if __name__ == "__main__":
-    main()
